@@ -1,10 +1,19 @@
 import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 
+
+
 class StoryGame {
     constructor() {
         this.messages = [
             {
-                content: "You are an expert RPG game master creating an immersive first-person adventure. Write in second person perspective (\"you\") and include basic RPG elements like character interactions and decisions. Provide exactly 4 choices for the player after each segment. Keep descriptions vivid but concise.",
+                content: `
+You are an expert Warhammer 40,000 Ork RPG game master. 
+The entire story, setting, and characters—including the player—must be set in the grimdark Warhammer 40k universe, focusing on Ork culture. 
+Write in second person perspective ("you") as if the player is an Ork Boy in a warband. 
+Include vivid descriptions of brutal Ork life, rough Ork speech patterns, improvised weapons, and constant threats of violence. 
+After each short narrative segment (2-3 sentences), provide exactly 4 possible actions (choices) that fit the Ork theme. 
+Keep descriptions concise but intense, and reflect the brutal, chaotic nature of the Orks.
+`,
                 role: "system",
             }
         ];
@@ -16,10 +25,10 @@ class StoryGame {
     }
 
     initializeElements() {
-        // Get all necessary DOM elements
         this.downloadBtn = document.getElementById("download");
         this.modelSelect = document.getElementById("model-selection");
         this.downloadStatus = document.getElementById("download-status");
+        // On peut enlever les références au genre
         this.genreContainer = document.querySelector(".genre-container");
         this.genreSelect = document.getElementById("genre-selection");
         this.startStoryBtn = document.getElementById("start-story");
@@ -34,13 +43,34 @@ class StoryGame {
     }
 
     setupEventListeners() {
-        this.downloadBtn.addEventListener("click", () => this.initializeModel());
-        this.startStoryBtn.addEventListener("click", () => this.startStory());
+        this.downloadBtn.addEventListener("click", () => {
+            this.playButtonSound();
+            this.initializeModel();
+        });
+    
+        this.startStoryBtn.addEventListener("click", () => {
+            this.playButtonSound();
+            this.startStory();
+        });
+    
         this.choiceButtons.forEach((button, index) => {
-            button.addEventListener("click", () => this.handleChoice(index));
+            button.addEventListener("click", () => {
+                this.playButtonSound();
+                this.handleChoice(index);
+            });
         });
     }
-
+    
+    // Ajout d'une fonction pour jouer le son
+    playButtonSound() {
+        const audio = document.getElementById('button-sound');
+        if (audio) {
+            // Remettre à zéro si nécessaire pour rejouer le son depuis le début
+            audio.currentTime = 0;
+            audio.play();
+        }
+    }
+    
     setupModelSelection() {
         const availableModels = webllm.prebuiltAppConfig.model_list.map(m => m.model_id);
         availableModels.forEach((modelId) => {
@@ -56,22 +86,23 @@ class StoryGame {
         try {
             this.downloadBtn.disabled = true;
             this.downloadStatus.classList.remove("hidden");
-            
-            // Set up progress callback
+
             this.engine.setInitProgressCallback((report) => {
                 console.log("initialize", report.progress);
                 this.downloadStatus.textContent = report.text;
             });
 
-            // Initialize engine with selected model
             this.selectedModel = this.modelSelect.value;
             await this.engine.reload(this.selectedModel, {
                 temperature: 0.7,
                 top_p: 0.95,
             });
-            
+
             this.downloadStatus.textContent = "Model ready!";
+            // On peut masquer le genreContainer ou directement afficher la storyContainer
+            // Ici, on laisse apparaitre juste le bouton start-story
             this.genreContainer.classList.remove("hidden");
+
         } catch (error) {
             this.downloadStatus.textContent = "Error loading model: " + error.message;
             this.downloadBtn.disabled = false;
@@ -79,21 +110,21 @@ class StoryGame {
     }
 
     async startStory() {
-        const genre = this.genreSelect.value;
         this.storyContainer.classList.remove("hidden");
         
-        const prompt = `Create the opening of a first-person ${genre} RPG adventure. 
-            Describe the player's initial situation in second person perspective ("you"), 
-            setting the scene and immediate circumstance they find themselves in. 
-            Keep it to 2-3 sentences and then provide exactly 4 possible choices for what to do next.
-            
-            Make sure the choices feel like actual RPG actions (like "Search the room", "Talk to the merchant", 
-            "Draw your sword", etc.) rather than narrative choices.
+        // Prompt initial spécifique à l'univers Ork de Warhammer 40k
+        const prompt = `
+STORY:
+You stand amidst a broken battlefield littered with scrap metal, spored mushrooms, and the groaning remains of defeated foes. 
+As a fresh Ork Boy, your Choppa gripped tight, you snarl at the distant flashes of gunfire where humies and other gitz might be found. 
+The air reeks of fungus and burnt promethium, and your Warboss barks orders somewhere behind you.
 
-            Some choices should be good, some should be bad, and some should be neutral.
-            Some choices should have a chance to fail.
-            
-            Format the choices as: CHOICES: 1)... 2)... 3)... 4)...`;
+CHOICES:
+1) Charge headlong at the nearest sound of gunfire.
+2) Smash a pile of scrap to see if you can find something choppy.
+3) Yell at a nearby Grot to fetch you something useful.
+4) Try to sneak closer and listen for your Warboss’s orders.
+`;
 
         await this.generateStorySegment(prompt);
     }
@@ -102,13 +133,12 @@ class StoryGame {
         if (!response) return ["", []];
 
         try {
-            // Split into story and choices sections
             const storyPart = response.split('CHOICES:')[0]
                 .replace(/^STORY:\s*/i, '')
                 .trim();
-            
+
             const choicesPart = response.split('CHOICES:')[1] || '';
-            
+
             let choices = choicesPart
                 .split(/\d\)/)
                 .filter(choice => choice.trim())
@@ -129,26 +159,27 @@ class StoryGame {
 
     async handleChoice(choiceIndex) {
         const choiceText = this.choiceButtons[choiceIndex].textContent;
-        
-        // Clear all choice buttons immediately
+
         this.choiceButtons.forEach(button => {
             button.textContent = '';
         });
 
-        const prompt = `Continue the first-person RPG story based on the player choosing: "${choiceText}"
+        // Prompt suivant, toujours dans le thème Ork
+        const prompt = `
+Continue the Warhammer 40k Ork RPG story, focusing on brutal, Ork-centered action. 
+You have chosen: "${choiceText}"
 
-Write the next part in second person perspective ("you"), describing the immediate results 
-of their action and the new situation they face (2-3 sentences). Then provide 4 new 
-numbered choices that represent concrete actions the player can take.
+STORY:
+[Describe in 2-3 sentences what immediately happens due to that choice, 
+keeping the grim, Orky tone and second-person perspective. 
+Show the consequences, maybe finding loot, crushing an enemy, or preparing for bigger fights.]
 
-Format your response as:
-
-STORY: [Your story paragraph here]
 CHOICES:
-1) [First action]
-2) [Second action]
-3) [Third action]
-4) [Fourth action]`;
+1) [Another violent or cunning Ork action]
+2) [Something reckless but possibly rewarding]
+3) [Something more strategic or manipulative]
+4) [A bizarre Orky idea, risky but fun]
+`;
 
         await this.generateStorySegment(prompt);
     }
@@ -156,12 +187,11 @@ CHOICES:
     updateStoryText(text) {
         const [story] = this.parseResponse(text);
         if (story && story.trim()) {
-            
             const cleanStory = story
                 .replace(/^STORY:\s*/i, '')
-                .split('CHOICES:')[0] 
+                .split('CHOICES:')[0]
                 .trim();
-            
+
             if (!this.storyBox.querySelector('.current-segment')) {
                 this.storyBox.innerHTML += `<p class="current-segment">${cleanStory}</p>`;
             } else {
@@ -174,7 +204,7 @@ CHOICES:
     async generateStorySegment(prompt) {
         try {
             this.choiceButtons.forEach(btn => btn.disabled = true);
-            
+
             const message = {
                 content: prompt,
                 role: "user"
@@ -187,7 +217,6 @@ CHOICES:
                 messages: this.messages,
             });
 
-            
             const previousSegment = this.storyBox.querySelector('.current-segment');
             if (previousSegment) {
                 previousSegment.classList.remove('current-segment');
@@ -197,7 +226,7 @@ CHOICES:
                 const curDelta = chunk.choices[0].delta.content;
                 if (curDelta) {
                     curMessage += curDelta;
-                    
+
                     if (!curMessage.includes("CHOICES:")) {
                         this.updateStoryText(curMessage);
                     }
@@ -211,14 +240,13 @@ CHOICES:
             });
 
             const [story, choices] = this.parseResponse(finalMessage);
-            
-            // Update the final story segment
+
             const currentSegment = this.storyBox.querySelector('.current-segment');
             if (currentSegment) {
                 currentSegment.textContent = story.replace(/^STORY:\s*/i, '');
                 currentSegment.classList.remove('current-segment');
             }
-            
+
             this.updateChoices(choices);
             this.choiceButtons.forEach(btn => btn.disabled = false);
         } catch (error) {
@@ -235,7 +263,7 @@ CHOICES:
     }
 }
 
-// Initialize the game when the page loads
 window.addEventListener("load", () => {
     const game = new StoryGame();
 });
+

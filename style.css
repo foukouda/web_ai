@@ -2,82 +2,96 @@ body {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
-  font-family: 'Segoe UI', 'Roboto', sans-serif;
-  background-color: #1a1a1a;
-  color: #e0e0e0;
+  font-family: 'Impact', 'Arial Black', sans-serif;
+  /* Utilisation de l'image PNG comme fond */
+  background: #0f0f0f url('assets/ork_background.jpg') no-repeat center center fixed; 
+  background-size: cover;
+  color: #ddd;
 }
 
 h1 {
   text-align: center;
-  color: #fff;
+  color: #9f0000; /* Rouge sombre Ork */
   text-transform: uppercase;
-  letter-spacing: 2px;
-  text-shadow: 0 0 10px rgba(0, 195, 255, 0.5);
+  letter-spacing: 3px;
+  font-size: 3em; /* Augmente la taille de la police */
+  margin-bottom: 40px;
+  text-shadow: 
+    0 0 5px #4caf50,  /* Lueur verte */
+    0 0 10px #9f0000, /* Lueur rouge */
+    0 0 15px #ffffff; /* Un léger halo blanc pour plus de contraste */
 }
 
+
 .setup-container, .genre-container, .story-container {
-  background-color: #2a2a2a;
+  background: rgba(20, 20, 20, 0.9);
   padding: 25px;
-  border-radius: 15px;
+  border-radius: 10px;
   margin: 20px 0;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  border: 1px solid #3a3a3a;
+  border: 2px solid #4caf50; /* Bordure verte Ork */
+  box-shadow: 0 0 10px #000;
+}
+
+.setup-container p,
+.genre-container p {
+  font-size: 1.1em;
+  margin-bottom: 15px;
 }
 
 select, button {
   padding: 12px;
-  border-radius: 8px;
+  border-radius: 5px;
   font-size: 16px;
-  background-color: #333;
+  background: #333;
   color: #fff;
-  border: 1px solid #444;
+  border: 2px solid #4caf50;
+  cursor: pointer;
   transition: all 0.3s ease;
+  text-transform: uppercase;
+  font-weight: bold;
 }
 
 select {
-  background-color: #333;
-  color: #fff;
-  cursor: pointer;
+  background: #222;
+  color: #4caf50;
 }
 
-select:focus, button:focus {
+select:focus,
+button:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 195, 255, 0.5);
+  box-shadow: 0 0 0 2px #9f0000;
 }
 
 button {
-  background: linear-gradient(135deg, #2196F3, #1976D2);
-  color: white;
-  border: none;
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: 500;
+  background: linear-gradient(135deg, #333, #222);
+  color: #4caf50;
 }
 
 button:hover {
-  background: linear-gradient(135deg, #1976D2, #1565C0);
+  background: linear-gradient(135deg, #4caf50, #333);
+  color: #ddd;
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
+  box-shadow: 0 5px 15px rgba(79, 175, 80, 0.3);
 }
 
 button:disabled {
-  background: #404040;
+  background: #555;
+  color: #777;
   transform: none;
   box-shadow: none;
   cursor: not-allowed;
 }
 
 .story-box {
-  background-color: #2a2a2a;
+  background: #191919;
   padding: 25px;
-  border-radius: 12px;
+  border-radius: 5px;
   margin-bottom: 20px;
-  min-height: 200px;
-  border: 1px solid #3a3a3a;
+  border: 2px solid #4caf50;
   line-height: 1.8;
-  font-size: 1.1em;
+  font-size: 1.2em;
   color: #e0e0e0;
+  box-shadow: inset 0 0 10px #000;
 }
 
 .choices-container {
@@ -87,20 +101,26 @@ button:disabled {
 }
 
 .choice-btn {
-  background: linear-gradient(135deg, #333, #404040);
+  background: #222;
   padding: 20px;
   text-align: left;
   min-height: 70px;
-  border: 1px solid #444;
+  border: 2px solid #4caf50;
   transition: all 0.3s ease;
-  text-transform: none;
-  font-weight: normal;
-  letter-spacing: normal;
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #4caf50;
+  font-size: 1em;
 }
 
 .choice-btn:hover {
-  background: linear-gradient(135deg, #404040, #505050);
-  border-color: #00c3ff;
+  background: #333;
+  border-color: #9f0000;
+  color: #ddd;
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 195, 255, 0.2);
+  box-shadow: 0 5px 15px rgba(159, 0, 0, 0.2);
+}
+
+.hidden {
+  display: none;
 }
