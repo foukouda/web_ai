@@ -1,3 +1,5 @@
+![Waaagh Ork Battle](assets/ork_background.jpg)
+
 # Waaagh Story Adventure
 
 Un projet interactif utilisant web-llm pour générer des aventures narratives dans l'univers Ork de Warhammer 40k.
@@ -93,3 +95,4 @@ waaagh-story-adventure/
 - **Licence** : MIT (modifiable selon vos besoins).
 
 Merci pour votre intérêt, et **WAAAGH!**
+![imagre](assets/readme.png)
