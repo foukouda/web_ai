@@ -8,35 +8,64 @@
   </head>
 
   <body>
-    <!-- Ajout d’un élément audio caché -->
+    <!-- Son de clic -->
     <audio id="button-sound" src="assets/button_click.mp3" preload="auto"></audio>
 
     <h1>WAAAGH! STORY ADVENTURE</h1>
-    
-    <div class="setup-container">
-      <p>Step 1: Initialize da Git-Crunchin' AI</p>
-      <div class="download-container">
-        <select id="model-selection"></select>
-        <button id="download">Load Da Big Brain</button>
+
+    <!-- Conteneur principal en 2 colonnes -->
+    <div class="main-container">
+      
+      <!-- Colonne de gauche : histoire + choix -->
+      <div class="left-column">
+        <!-- Zone d’histoire -->
+        <div class="story-container">
+          <div id="story-box" class="story-box"></div>
+          <div id="choices-container" class="choices-container">
+            <button class="choice-btn" id="choice1"></button>
+            <button class="choice-btn" id="choice2"></button>
+            <button class="choice-btn" id="choice3"></button>
+            <button class="choice-btn" id="choice4"></button>
+          </div>
+        </div>
       </div>
-      <p id="download-status" class="hidden"></p>
-    </div>
 
-    <div class="genre-container hidden">
-      <p>Step 2: Dis Step 'Ain't Needed Fer Gitz, Just Start!</p>
-      <button id="start-story">Begin Da WAAAGH!</button>
-    </div>
+      <!-- Colonne de droite : configuration du modèle + genre + nombre de tours -->
+      <div class="right-column">
+        
+        <!-- Étape 1 : Choix du modèle et téléchargement -->
+        <div class="setup-container">
+          <p>Step 1: Initialize da Git-Crunchin' AI</p>
+          <div class="download-container">
+            <select id="model-selection"></select>
+            <button id="download">Load Da Big Brain</button>
+          </div>
+          <p id="download-status"></p>
+        </div>
 
-    <div class="story-container hidden">
-      <div id="story-box" class="story-box"></div>
-      <div id="choices-container" class="choices-container">
-        <button class="choice-btn" id="choice1"></button>
-        <button class="choice-btn" id="choice2"></button>
-        <button class="choice-btn" id="choice3"></button>
-        <button class="choice-btn" id="choice4"></button>
+        <!-- Étape 2 : Choix du "genre" / ambiance + nombre de tours -->
+        <div class="genre-container">
+          <p>Step 2: Choose Your Orky Genre (still 40k Orks)</p>
+          
+          <select id="genre-selection">
+            <option value="horror">Horror</option>
+            <option value="funny">Funny</option>
+            <option value="adventure">Adventure</option>
+            <option value="epic">Epic</option>
+          </select>
+
+          <div class="turn-config-container">
+            <label for="turns-input">How many Orky Rounds?</label>
+            <input id="turns-input" type="number" min="1" value="5">
+          </div>
+
+          <button id="start-story">Begin Da WAAAGH!</button>
+        </div>
+
       </div>
     </div>
 
+    <!-- Script principal -->
     <script src="./script.js" type="module"></script>
   </body>
 </html>

@@ -1,35 +1,52 @@
 body {
-  max-width: 800px;
+  max-width: 1280px; 
   margin: 0 auto;
   padding: 20px;
   font-family: 'Impact', 'Arial Black', sans-serif;
-  /* Utilisation de l'image PNG comme fond */
-  background: #0f0f0f url('assets/ork_background.jpg') no-repeat center center fixed; 
+  background: #0f0f0f url('assets/ork_background.jpg') no-repeat center center fixed;
   background-size: cover;
   color: #ddd;
 }
 
+/* Titre principal */
 h1 {
   text-align: center;
-  color: #9f0000; /* Rouge sombre Ork */
+  color: #9f0000; 
   text-transform: uppercase;
   letter-spacing: 3px;
-  font-size: 3em; /* Augmente la taille de la police */
+  font-size: 3em;
   margin-bottom: 40px;
   text-shadow: 
-    0 0 5px #4caf50,  /* Lueur verte */
-    0 0 10px #9f0000, /* Lueur rouge */
-    0 0 15px #ffffff; /* Un léger halo blanc pour plus de contraste */
+    0 0 5px #4caf50,
+    0 0 10px #9f0000,
+    0 0 15px #ffffff;
 }
 
+.main-container {
+  display: flex;
+  flex-direction: row;
+  gap: 20px; 
+}
+
+.left-column {
+  flex: 2; 
+}
+
+.right-column {
+  flex: 1;
+}
 
 .setup-container, .genre-container, .story-container {
   background: rgba(20, 20, 20, 0.9);
   padding: 25px;
   border-radius: 10px;
   margin: 20px 0;
-  border: 2px solid #4caf50; /* Bordure verte Ork */
+  border: 2px solid #4caf50;
   box-shadow: 0 0 10px #000;
+}
+
+.story-container {
+  margin-top: 0;
 }
 
 .setup-container p,
@@ -38,7 +55,7 @@ h1 {
   margin-bottom: 15px;
 }
 
-select, button {
+select, button, input {
   padding: 12px;
   border-radius: 5px;
   font-size: 16px;
@@ -57,7 +74,8 @@ select {
 }
 
 select:focus,
-button:focus {
+button:focus,
+input:focus {
   outline: none;
   box-shadow: 0 0 0 2px #9f0000;
 }
@@ -82,6 +100,7 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* Boîte d'histoire */
 .story-box {
   background: #191919;
   padding: 25px;

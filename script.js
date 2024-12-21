@@ -1,9 +1,8 @@
 import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 
-
-
 class StoryGame {
     constructor() {
+        // Message système : impose l'univers Warhammer 40k Ork
         this.messages = [
             {
                 content: `
@@ -18,28 +17,50 @@ Keep descriptions concise but intense, and reflect the brutal, chaotic nature of
             }
         ];
         this.engine = new webllm.MLCEngine();
-        this.selectedModel = "Llama-3-8B-Instruct-q4f32_1-MLC-1k"; // Base model
+        // Choisissez ici un modèle existant dans webllm
+        this.selectedModel = "Llama-2-7b-chat-hf-q4f16_0"; 
+
+        // Nombre de tours restants
+        this.turnsRemaining = 0;
+
         this.initializeElements();
         this.setupEventListeners();
         this.setupModelSelection();
     }
 
     initializeElements() {
+        // Bouton téléchargement
         this.downloadBtn = document.getElementById("download");
+        // Sélecteur de modèles
         this.modelSelect = document.getElementById("model-selection");
+        // Indicateur de statut
         this.downloadStatus = document.getElementById("download-status");
-        // On peut enlever les références au genre
+
+        // Conteneur de genre
         this.genreContainer = document.querySelector(".genre-container");
+        // Sélecteur de genre
         this.genreSelect = document.getElementById("genre-selection");
+
+        // Input pour le nombre de tours
+        this.turnsInput = document.getElementById("turns-input");
+
+        // Bouton de démarrage de l'histoire
         this.startStoryBtn = document.getElementById("start-story");
+
+        // Conteneur d'histoire
         this.storyContainer = document.querySelector(".story-container");
         this.storyBox = document.getElementById("story-box");
+
+        // Boutons de choix
         this.choiceButtons = [
             document.getElementById("choice1"),
             document.getElementById("choice2"),
             document.getElementById("choice3"),
             document.getElementById("choice4")
         ];
+
+        // Son de clic
+        this.buttonSound = document.getElementById("button-sound");
     }
 
     setupEventListeners() {
@@ -47,12 +68,12 @@ Keep descriptions concise but intense, and reflect the brutal, chaotic nature of
             this.playButtonSound();
             this.initializeModel();
         });
-    
+
         this.startStoryBtn.addEventListener("click", () => {
             this.playButtonSound();
             this.startStory();
         });
-    
+
         this.choiceButtons.forEach((button, index) => {
             button.addEventListener("click", () => {
                 this.playButtonSound();
@@ -60,17 +81,14 @@ Keep descriptions concise but intense, and reflect the brutal, chaotic nature of
             });
         });
     }
-    
-    // Ajout d'une fonction pour jouer le son
+
     playButtonSound() {
-        const audio = document.getElementById('button-sound');
-        if (audio) {
-            // Remettre à zéro si nécessaire pour rejouer le son depuis le début
-            audio.currentTime = 0;
-            audio.play();
+        if (this.buttonSound) {
+            this.buttonSound.currentTime = 0;
+            this.buttonSound.play();
         }
     }
-    
+
     setupModelSelection() {
         const availableModels = webllm.prebuiltAppConfig.model_list.map(m => m.model_id);
         availableModels.forEach((modelId) => {
@@ -85,8 +103,8 @@ Keep descriptions concise but intense, and reflect the brutal, chaotic nature of
     async initializeModel() {
         try {
             this.downloadBtn.disabled = true;
-            this.downloadStatus.classList.remove("hidden");
-
+            this.downloadStatus.textContent = "";
+            
             this.engine.setInitProgressCallback((report) => {
                 console.log("initialize", report.progress);
                 this.downloadStatus.textContent = report.text;
@@ -99,9 +117,6 @@ Keep descriptions concise but intense, and reflect the brutal, chaotic nature of
             });
 
             this.downloadStatus.textContent = "Model ready!";
-            // On peut masquer le genreContainer ou directement afficher la storyContainer
-            // Ici, on laisse apparaitre juste le bouton start-story
-            this.genreContainer.classList.remove("hidden");
 
         } catch (error) {
             this.downloadStatus.textContent = "Error loading model: " + error.message;
@@ -110,20 +125,30 @@ Keep descriptions concise but intense, and reflect the brutal, chaotic nature of
     }
 
     async startStory() {
-        this.storyContainer.classList.remove("hidden");
-        
-        // Prompt initial spécifique à l'univers Ork de Warhammer 40k
+        const chosenGenre = this.genreSelect.value;
+        const chosenTurns = parseInt(this.turnsInput.value, 10) || 5;
+        this.turnsRemaining = chosenTurns;
+
+        const genreFlavorText = {
+            horror: "It’s a horror-themed Orky saga: grotesque, gory, and unnerving.",
+            funny: "It’s a funny Orky saga, filled with comedic violence and silly Grot mishaps.",
+            adventure: "It’s a grand Orky adventure: a quest for loot, krumpin’, and big WAAAGH! excitement.",
+            epic: "It’s an epic Orky saga, full of grand battles, huge explosions, and massive war machines."
+        };
+        const chosenFlavor = genreFlavorText[chosenGenre] || "It’s an Orky story.";
+
         const prompt = `
 STORY:
-You stand amidst a broken battlefield littered with scrap metal, spored mushrooms, and the groaning remains of defeated foes. 
+Da Orky tale youz about to hear is set in Warhammer 40k. ${chosenFlavor}
+You stand amidst a broken battlefield littered with scrap metal, spored mushrooms, and the remains of defeated foes. 
 As a fresh Ork Boy, your Choppa gripped tight, you snarl at the distant flashes of gunfire where humies and other gitz might be found. 
-The air reeks of fungus and burnt promethium, and your Warboss barks orders somewhere behind you.
+Da Warboss is bellowing orders behind you, and you smell the stink of fungus, sweat, and smoke.
 
 CHOICES:
 1) Charge headlong at the nearest sound of gunfire.
-2) Smash a pile of scrap to see if you can find something choppy.
-3) Yell at a nearby Grot to fetch you something useful.
-4) Try to sneak closer and listen for your Warboss’s orders.
+2) Scavenge the scrap for something mean ‘n’ choppy.
+3) Threaten a nearby Grot to bring you loot.
+4) Attempt to sneak forward to see what Da Warboss is yelling about.
 `;
 
         await this.generateStorySegment(prompt);
@@ -152,19 +177,31 @@ CHOICES:
             return [storyPart, choices];
         } catch (error) {
             console.error("Error parsing response:", error);
-            return ["An error occurred while generating the story.", 
-                ["Try again", "Restart", "Continue anyway", "Start over"]];
+            return [
+                "An error occurred while generating the story.",
+                ["Try again", "Restart", "Continue anyway", "Start over"]
+            ];
         }
     }
 
     async handleChoice(choiceIndex) {
+        // Décrémente le nombre de tours restants
+        this.turnsRemaining--;
+
+        // Si plus de tours, on termine l'histoire
+        if (this.turnsRemaining <= 0) {
+            this.endStory();
+            return;
+        }
+
+        // Sinon on continue l'histoire
         const choiceText = this.choiceButtons[choiceIndex].textContent;
 
+        // On vide temporairement le texte des boutons
         this.choiceButtons.forEach(button => {
             button.textContent = '';
         });
 
-        // Prompt suivant, toujours dans le thème Ork
         const prompt = `
 Continue the Warhammer 40k Ork RPG story, focusing on brutal, Ork-centered action. 
 You have chosen: "${choiceText}"
@@ -180,29 +217,12 @@ CHOICES:
 3) [Something more strategic or manipulative]
 4) [A bizarre Orky idea, risky but fun]
 `;
-
         await this.generateStorySegment(prompt);
-    }
-
-    updateStoryText(text) {
-        const [story] = this.parseResponse(text);
-        if (story && story.trim()) {
-            const cleanStory = story
-                .replace(/^STORY:\s*/i, '')
-                .split('CHOICES:')[0]
-                .trim();
-
-            if (!this.storyBox.querySelector('.current-segment')) {
-                this.storyBox.innerHTML += `<p class="current-segment">${cleanStory}</p>`;
-            } else {
-                const currentSegment = this.storyBox.querySelector('.current-segment');
-                currentSegment.textContent = cleanStory;
-            }
-        }
     }
 
     async generateStorySegment(prompt) {
         try {
+            // Désactivation des boutons pendant la génération
             this.choiceButtons.forEach(btn => btn.disabled = true);
 
             const message = {
@@ -226,7 +246,6 @@ CHOICES:
                 const curDelta = chunk.choices[0].delta.content;
                 if (curDelta) {
                     curMessage += curDelta;
-
                     if (!curMessage.includes("CHOICES:")) {
                         this.updateStoryText(curMessage);
                     }
@@ -248,11 +267,30 @@ CHOICES:
             }
 
             this.updateChoices(choices);
+            // Réactivation des boutons
             this.choiceButtons.forEach(btn => btn.disabled = false);
+
         } catch (error) {
             console.error("Error generating story:", error);
             this.storyBox.innerHTML += `<p>An error occurred while generating the story.</p>`;
             this.updateChoices(["Try again", "Restart", "Continue anyway", "Start over"]);
+        }
+    }
+
+    updateStoryText(text) {
+        const [story] = this.parseResponse(text);
+        if (story && story.trim()) {
+            const cleanStory = story
+                .replace(/^STORY:\s*/i, '')
+                .split('CHOICES:')[0]
+                .trim();
+
+            if (!this.storyBox.querySelector('.current-segment')) {
+                this.storyBox.innerHTML += `<p class="current-segment">${cleanStory}</p>`;
+            } else {
+                const currentSegment = this.storyBox.querySelector('.current-segment');
+                currentSegment.textContent = cleanStory;
+            }
         }
     }
 
@@ -261,9 +299,21 @@ CHOICES:
             button.textContent = choices[index] || `Choice ${index + 1}`;
         });
     }
+
+    endStory() {
+        this.choiceButtons.forEach(button => {
+            button.disabled = true;
+            button.textContent = "No more Orky rounds!";
+        });
+
+        this.storyBox.innerHTML += `
+          <p style="margin-top:20px; color: #9f0000; font-weight: bold;">
+            You'z outta Rounds! Da Orky story ends ‘ere. WAAAGH Over!
+          </p>
+        `;
+    }
 }
 
 window.addEventListener("load", () => {
     const game = new StoryGame();
 });
-
